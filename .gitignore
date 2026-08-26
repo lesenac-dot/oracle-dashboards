@@ -12,9 +12,9 @@ __pycache__/
 venv/
 env/
 
-# ─── ORA BRABO ────────────────────────────────────────────
+# ─── Oracle Dashboards ────────────────────────────────────────────
 # Backups datados gerados localmente
-ora_brabo_backup_*.zip
+oracle_dashboards_backup_*.zip
 *.zip
 
 # Documentação de referência pesada (consultada localmente, não versionar)
@@ -22,9 +22,9 @@ database-reference.pdf
 *.pdf
 
 # Runtime / config local
-/tmp/ora_brabo.log
+/tmp/oracle_dashboards.log
 *.log
-.ora_brabo/
+.oracle_dashboards/
 .claude/
 
 # Dados de ambiente de cliente (IPs internos, bash_history) — nunca versionar

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 tools/validate_queries.py
-Query linter for ORA BRABO — validates EVERY SQL used by the collectors
+Query linter for Oracle Dashboards — validates EVERY SQL used by the collectors
 against a live Oracle database WITHOUT fetching data.
 
 Each query is wrapped as `SELECT * FROM ( <query> ) WHERE ROWNUM = 0`, so the
@@ -100,7 +100,7 @@ def _connect(args) -> oracledb.Connection:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Validate all ORA BRABO SQL against a live DB.")
+    ap = argparse.ArgumentParser(description="Validate all Oracle Dashboards SQL against a live DB.")
     ap.add_argument("--host")
     ap.add_argument("--port", type=int, default=1521)
     ap.add_argument("--service")

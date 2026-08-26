@@ -61,7 +61,7 @@ class HelpScreen(ModalScreen):
         ("Esc",      "Close filter / modal / screen",                "Actions"),
         ("R",        "Generate AWR Report (on F10 AWR panel)",       "Actions"),
         ("?",        "This help screen",                             "App"),
-        ("Q",        "Quit ORA BRABO",                               "App"),
+        ("Q",        "Quit Oracle Dashboards",                               "App"),
     ]
 
     def compose(self) -> ComposeResult:
@@ -91,7 +91,7 @@ class HelpScreen(ModalScreen):
             )
             prev_cat = cat
 
-        header = Text("  ORA BRABO — Keyboard Reference\n", style="bold white")
+        header = Text("  Oracle Dashboards — Keyboard Reference\n", style="bold white")
         header.append("  Press Esc or Q to close\n", style="dim")
 
         self.query_one("#help-body", Static).update(

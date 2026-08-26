@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ORA BRABO launcher
+# Oracle Dashboards launcher
 # Usa o virtualenv do projeto (.venv/) se existir; caso contrário usa python3 do sistema.
 set -euo pipefail
 
@@ -13,7 +13,7 @@ if [[ -x "$VENV_PYTHON" ]]; then
 else
     # Fallback: sistema — tenta instalar se textual não encontrado
     if ! python3 -c "import textual" 2>/dev/null; then
-        echo "ORA BRABO: dependências não encontradas."
+        echo "Oracle Dashboards: dependências não encontradas."
         echo "Execute: bash $SCRIPT_DIR/install.sh"
         exit 1
     fi

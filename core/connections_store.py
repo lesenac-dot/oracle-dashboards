@@ -1,6 +1,6 @@
 """
 core/connections_store.py
-Persists saved Oracle connections to ~/.ora_brabo/connections.json.
+Persists saved Oracle connections to ~/.oracle_dashboards/connections.json.
 Passwords are stored in the system keychain (keyring) when available;
 otherwise fall back to plaintext in JSON for backward compatibility.
 """
@@ -15,9 +15,9 @@ from core.config import AppConfig
 
 log = logging.getLogger(__name__)
 
-_STORE_DIR  = Path.home() / ".ora_brabo"
+_STORE_DIR  = Path.home() / ".oracle_dashboards"
 _STORE_FILE = _STORE_DIR / "connections.json"
-_KEYRING_SERVICE = "ora_brabo"
+_KEYRING_SERVICE = "oracle_dashboards"
 
 # Graceful import — keyring may not be installed
 try:

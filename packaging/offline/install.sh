@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# ORA BRABO - instalacao OFFLINE (air-gapped).
+# Oracle Dashboards - instalacao OFFLINE (air-gapped).
 # Cria o venv e instala TODAS as dependencias a partir dos wheels locais (sem internet).
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WHEELS="$HERE/wheels"
-APP="$HERE/ora_brabo"
+APP="$HERE/oracle_dashboards"
 
 # Descobre o Python nesta ordem:
 #   1) variavel PYTHON=...        (voce aponta manualmente)

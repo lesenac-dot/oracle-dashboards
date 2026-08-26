@@ -1,8 +1,7 @@
 """
-ORA BRABO Monitoring Tool
+Oracle Dashboards Monitoring Tool
 =========================
 Oracle Database TUI Monitor — inspired by Dolphie, powered by Textual.
-Author : DBA BRABO | Acacio Lima Rocha
 Version: 1.3.3 — Advisor findings render fix + thin-mode timestamp/CLOB fixes (scheduler, alertlog)
 """
 
@@ -11,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import sys
+import tempfile
 from pathlib import Path
 
 from textual.app import App, ComposeResult
@@ -20,19 +20,19 @@ from textual.widgets import ContentSwitcher, Footer, Header, Tab, Tabs
 
 from core.config import AppConfig
 from core.connection_session import ConnectionSession
-from core.version import __version__, BANNER_ART
+from core.version import __version__
 from widgets.connection_pane import ConnectionPane
 from widgets.add_connection_modal import AddConnectionModal
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[logging.FileHandler("/tmp/ora_brabo.log")],
+    handlers=[logging.FileHandler(Path(tempfile.gettempdir()) / "oracle_dashboards.log")],
 )
-log = logging.getLogger("ora_brabo")
+log = logging.getLogger("oracle_dashboards")
 
 
-class OraBraboApp(App):
+class OracleDashboardsApp(App):
     """
     Main TUI application.
 
@@ -41,7 +41,7 @@ class OraBraboApp(App):
     Ctrl+N opens a new connection; Ctrl+W closes the current one.
     """
 
-    CSS_PATH = Path(__file__).parent / "ora_brabo.tcss"
+    CSS_PATH = Path(__file__).parent / "oracle_dashboards.tcss"
 
     BINDINGS = [
         # ── Panel navigation (forwarded to the active ConnectionPane) ──
@@ -90,8 +90,8 @@ class OraBraboApp(App):
         Binding("q", "quit",  "Quit", show=True),
     ]
 
-    TITLE     = f"ORA BRABO Monitoring Tool v{__version__}"
-    SUB_TITLE = "Oracle Database TUI Monitor | DBA BRABO"
+    TITLE     = f"Oracle Dashboards Monitoring Tool v{__version__}"
+    SUB_TITLE = "Oracle Database TUI Monitor"
 
     def __init__(
         self,
@@ -125,7 +125,7 @@ class OraBraboApp(App):
     # ──────────────────────────────────────────────────────────────────
 
     async def on_mount(self) -> None:
-        log.info("ORA BRABO v%s starting (multi-tab, thick mode, cache priming).", __version__)
+        log.info("Oracle Dashboards v%s starting (multi-tab, thick mode, cache priming).", __version__)
         self.set_interval(0.5, self._tick_refresh)
 
         if self._initial_configs:
@@ -138,7 +138,7 @@ class OraBraboApp(App):
     async def on_unmount(self) -> None:
         for session in list(self._sessions.values()):
             await session.close()
-        log.info("ORA BRABO shut down cleanly.")
+        log.info("Oracle Dashboards shut down cleanly.")
 
     # ──────────────────────────────────────────────────────────────────
     # Tab events
@@ -245,7 +245,7 @@ class OraBraboApp(App):
                 self.notify(
                     f"Não é possível abrir '{config.label or config.service}' em modo "
                     f"{wanted}: esta sessão já está em {self._active_mode}. Thin e Thick "
-                    f"não se misturam no mesmo processo — abra outra instância do ora-brabo "
+                    f"não se misturam no mesmo processo — abra outra instância do oracle-dashboards "
                     f"para o outro modo.",
                     severity="error", timeout=15)
                 return
@@ -377,8 +377,8 @@ class OraBraboApp(App):
 # Entry point
 # ──────────────────────────────────────────────────────────────────────────────
 
-def _print_version_banner() -> None:
-    """Print a colored ASCII banner with the ORA BRABO version."""
+def _print_version_info() -> None:
+    """Print concise application version information."""
     import platform
     from rich.console import Console
 
@@ -388,10 +388,8 @@ def _print_version_banner() -> None:
         odb = "?"
 
     c = Console()
-    c.print(BANNER_ART, style="bold #58a6ff")
-    c.print(f"  ORA BRABO Monitoring Tool   ·   v{__version__}", style="bold #e6edf3")
+    c.print(f"Oracle Dashboards · v{__version__}", style="bold #e6edf3")
     c.print("  Oracle Database TUI Monitor — inspired by Dolphie", style="#8b949e")
-    c.print("  DBA BRABO · Acacio Lima Rocha", style="#8b949e")
     c.print(
         f"  Python {platform.python_version()}  ·  oracledb {odb} (thin)",
         style="#484f58",
@@ -403,17 +401,17 @@ def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="ORA BRABO — Oracle Database TUI Monitor",
+        description="Oracle Dashboards — Oracle Database TUI Monitor",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "Examples:\n"
-            "  ora_brabo --host db01 --service ORCL --user system --password secret\n"
-            "  ora_brabo --host db01 --service ORCL --user sys --password secret --sysdba\n"
-            "  ora_brabo --host db01 --service ORCL --user sys --password secret --thick\n"
-            "  ora_brabo --start-saved PROD,DW    # open saved connections as tabs\n"
-            "  ora_brabo --start-saved all        # open every saved connection\n"
-            "  ora_brabo --list-saved             # list saved connection labels\n"
-            "  ora_brabo                          # opens connection dialog"
+            "  oracle_dashboards --host db01 --service ORCL --user system --password secret\n"
+            "  oracle_dashboards --host db01 --service ORCL --user sys --password secret --sysdba\n"
+            "  oracle_dashboards --host db01 --service ORCL --user sys --password secret --thick\n"
+            "  oracle_dashboards --start-saved PROD,DW    # open saved connections as tabs\n"
+            "  oracle_dashboards --start-saved all        # open every saved connection\n"
+            "  oracle_dashboards --list-saved             # list saved connection labels\n"
+            "  oracle_dashboards                          # opens connection dialog"
         ),
     )
     parser.add_argument("--host",           default=None, help="Oracle host")
@@ -447,14 +445,14 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.version:
-        _print_version_banner()
+        _print_version_info()
         sys.exit(0)
 
     if args.list_saved:
         from core.connections_store import load_connections
         conns = load_connections()
         if not conns:
-            print("Nenhuma saved connection encontrada (~/.ora_brabo/connections.json).")
+            print("Nenhuma saved connection encontrada (~/.oracle_dashboards/connections.json).")
         else:
             print("Saved connections:")
             for c in conns:
@@ -507,7 +505,7 @@ def main() -> None:
             oracle_client_lib_dir=args.client_dir,
         )]
 
-    OraBraboApp(initial_configs=initial_configs or None).run()
+    OracleDashboardsApp(initial_configs=initial_configs or None).run()
 
 
 if __name__ == "__main__":

@@ -1,13 +1,12 @@
-# ORA BRABO — CLAUDE CODE BRIEFING
+# Oracle Dashboards — CLAUDE CODE BRIEFING
 > Leia este arquivo inteiro antes de qualquer ação no projeto.
 
 ---
 
 ## O QUE É ESTE PROJETO
 
-**ORA BRABO Monitoring Tool** — TUI (Terminal User Interface) para Oracle Database, inspirada no Dolphie para MySQL, com funcionalidades equivalentes ao Oracle Enterprise Manager (OEM). Roda 100% em terminal Linux via SSH.
+**Oracle Dashboards Monitoring Tool** — TUI (Terminal User Interface) para Oracle Database, inspirada no Dolphie para MySQL, com funcionalidades equivalentes ao Oracle Enterprise Manager (OEM). Roda 100% em terminal Linux via SSH.
 
-**Autor:** Acacio Lima Rocha (DBA BRABO)
 **Stack:** Python 3.12+, Textual, Rich, oracledb (Thin Mode por padrão, Thick Mode opcional), AsyncIO
 **Versão atual:** 1.3.3 — multi-tab, thick mode, cache priming (ver `core/version.py` / `pyproject.toml`)
 
@@ -16,9 +15,9 @@
 ## ESTRUTURA DO PROJETO
 
 ```
-ora_brabo/
-├── app.py                        # Entry point, OraBraboApp (Textual App), bindings F1-F12 + Ctrl+1-9
-├── ora_brabo.tcss                # Dark theme CSS (GitHub dark palette)
+oracle_dashboards/
+├── app.py                        # Entry point, OracleDashboardsApp (Textual App), bindings F1-F12 + Ctrl+1-9
+├── oracle_dashboards.tcss                # Dark theme CSS (GitHub dark palette)
 ├── requirements.txt              # oracledb, textual, rich, plotext, keyring
 ├── requirements-optional.txt     # reportlab+pillow — só para export de PDF (F-Report)
 ├── README.md
@@ -27,11 +26,11 @@ ora_brabo/
 │   ├── config.py                 # AppConfig dataclass (conexão padrão, wallet/ADB, thick mode, timeouts)
 │   ├── connection_manager.py     # Pool async oracledb (Thin ou Thick), execute_query/ddl/fetch_one
 │   ├── connection_session.py     # Bundle por aba: 1 conn_manager + 1 cache + 1 scheduler + 1 advisor
-│   ├── connections_store.py      # Histórico de conexões (~/.ora_brabo/connections.json)
+│   ├── connections_store.py      # Histórico de conexões (~/.oracle_dashboards/connections.json)
 │   ├── demo_data.py              # DemoRunner — popula o cache com dados simulados (--demo, sem Oracle)
 │   ├── cache.py                  # MetricsCache: TTL + ring-buffer 120 pontos, thread-safe
 │   ├── scheduler.py              # Async scheduler por sessão, 17 collectors em tasks paralelas
-│   └── version.py                # __version__ + BANNER_ART (fonte única de versão)
+│   └── version.py                # fonte única de versão (__version__)
 │
 ├── collectors/                   # 17 collectors ativos no scheduler (ver tabela abaixo)
 │   ├── base.py                   # BaseCollector ABC
@@ -74,7 +73,7 @@ O app deixou de ser single-connection. Cada aba é um `ConnectionSession` (`core
 - seu próprio `AdvisorEngine`
 - um health-check loop (`_health_check_loop`) que faz `SELECT 1 FROM DUAL` a cada 15s e tenta reconectar após 3 falhas consecutivas
 
-`OraBraboApp` (`app.py`) gerencia N sessões simultâneas via `Tabs`/`ContentSwitcher`. Nova conexão: tecla `+` (ou `Ctrl+N`/`Ctrl+O` como fallback para terminais que engolem essas teclas) abre `AddConnectionModal`. Fechar aba: `Ctrl+W`.
+`OracleDashboardsApp` (`app.py`) gerencia N sessões simultâneas via `Tabs`/`ContentSwitcher`. Nova conexão: tecla `+` (ou `Ctrl+N`/`Ctrl+O` como fallback para terminais que engolem essas teclas) abre `AddConnectionModal`. Fechar aba: `Ctrl+W`.
 
 Modo demo (`--demo`) usa `DemoRunner` (`core/demo_data.py`, ~1100 linhas) em vez de scheduler+conn_manager — popula o cache com dados fake, sem precisar de Oracle.
 
@@ -175,7 +174,7 @@ TTL padrão = `self.interval + 2` para dados voláteis, `60` para dados semi-est
 ### Logging
 ```python
 log = logging.getLogger(__name__)
-# Log vai para /tmp/ora_brabo.log
+# Log vai para /tmp/oracle_dashboards.log
 ```
 
 ### Erros de query
@@ -204,7 +203,7 @@ Isso inicia uma sessão com `DemoRunner` (`core/demo_data.py`) alimentando o cac
 
 ## REFERÊNCIA — DEMO HTML
 
-O arquivo `ora_brabo_demo.html` (na raiz do projeto, se presente) é o **design reference** visual da interface. Consultar sempre que criar novos painéis ou componentes visuais.
+O arquivo `oracle_dashboards_demo.html` (na raiz do projeto, se presente) é o **design reference** visual da interface. Consultar sempre que criar novos painéis ou componentes visuais.
 
 ---
 

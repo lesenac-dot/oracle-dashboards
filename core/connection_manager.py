@@ -26,8 +26,8 @@ from core.config import AppConfig
 
 log = logging.getLogger(__name__)
 
-# Wallets are extracted once to ~/.ora_brabo/wallets/<hash>/
-_WALLET_BASE = Path.home() / ".ora_brabo" / "wallets"
+# Wallets are extracted once to ~/.oracle_dashboards/wallets/<hash>/
+_WALLET_BASE = Path.home() / ".oracle_dashboards" / "wallets"
 
 # init_oracle_client() is process-global and may only be called once. Guard it.
 _thick_client_initialized = False

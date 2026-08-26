@@ -33,7 +33,7 @@ from core.cache import MetricsCache
 
 log = logging.getLogger(__name__)
 
-REPORTS_DIR = Path.home() / ".ora_brabo" / "reports"
+REPORTS_DIR = Path.home() / ".oracle_dashboards" / "reports"
 
 _ACCENT = colors.HexColor("#1f6fb2")
 _ACCENT_DARK = colors.HexColor("#14507f")
@@ -120,15 +120,37 @@ def _hexcode(c) -> str:
 
 
 def _styled_table(header: list, rows: list[list], col_widths=None, font_size: int = 7) -> Table:
-    t = Table([header] + rows, colWidths=col_widths, repeatRows=1)
+    # Plain strings don't wrap inside ReportLab table cells and can overprint
+    # adjacent columns. Paragraphs respect colWidths and grow the row height,
+    # keeping long SQL/object/segment names readable throughout the report.
+    body_style = ParagraphStyle(
+        f"ObTableCell{font_size}", parent=_CELL, fontSize=font_size,
+        leading=max(font_size + 1.5, 8), splitLongWords=True,
+        wordWrap="LTR", spaceBefore=0, spaceAfter=0,
+    )
+    header_style = ParagraphStyle(
+        f"ObTableHeader{font_size}", parent=body_style,
+        fontName="Helvetica-Bold", textColor=colors.white,
+    )
+
+    def cell(value, style):
+        if hasattr(value, "wrapOn"):
+            return value
+        return Paragraph(_xml_escape("" if value is None else str(value)), style)
+
+    wrapped_header = [cell(value, header_style) for value in header]
+    wrapped_rows = [[cell(value, body_style) for value in row] for row in rows]
+    t = Table([wrapped_header] + wrapped_rows, colWidths=col_widths, repeatRows=1,
+              hAlign="LEFT", splitByRow=1)
     t.setStyle(TableStyle([
         ("BACKGROUND",      (0, 0), (-1, 0), _ACCENT),
         ("TEXTCOLOR",       (0, 0), (-1, 0), colors.white),
         ("FONTNAME",        (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE",        (0, 0), (-1, -1), font_size),
         ("GRID",            (0, 0), (-1, -1), 0.3, colors.HexColor("#cccccc")),
         ("ROWBACKGROUNDS",  (0, 1), (-1, -1), [colors.white, colors.HexColor("#f2f2f2")]),
         ("VALIGN",          (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING",     (0, 0), (-1, -1), 3),
+        ("RIGHTPADDING",    (0, 0), (-1, -1), 3),
         ("TOPPADDING",      (0, 0), (-1, -1), 3),
         ("BOTTOMPADDING",   (0, 0), (-1, -1), 3),
     ]))
@@ -292,7 +314,7 @@ def _build_cover(cache: MetricsCache) -> list:
     avg_ts_pct  = (sum(_pick_num(t, "used_pct", "pct_used") for t in ts_list) / len(ts_list)) if ts_list else 0.0
 
     banner = Table([[Paragraph(
-        "ORA BRABO &mdash; Database Performance &amp; Health Report", _H1)]], colWidths=[18 * cm])
+        "Oracle Dashboards &mdash; Database Performance &amp; Health Report", _H1)]], colWidths=[18 * cm])
     banner.setStyle(TableStyle([
         ("BACKGROUND",    (0, 0), (-1, -1), _ACCENT_DARK),
         ("TOPPADDING",    (0, 0), (-1, -1), 16),
@@ -658,21 +680,40 @@ def _build_tablespaces(cache: MetricsCache) -> list:
 def _build_segments(cache: MetricsCache) -> list:
     story = []
     big = cache.get("obj.biggest_segments", []) or []
+    big = sorted(big, key=lambda s: _num(s, "size_mb"), reverse=True)
     if big:
+        story.append(Paragraph("Largest Application Segments (Descending by Size)", _H3))
         rows = [[
             _txt(s, "owner"), _txt(s, "segment_name"), _txt(s, "segment_type"),
             _txt(s, "tablespace_name"), f"{_num(s, 'size_mb'):,.1f}",
-        ] for s in big[:15]]
+        ] for s in big[:50]]
         story.append(_styled_table(
             ["Owner", "Segment", "Type", "Tablespace", "Size (MB)"], rows,
-            col_widths=[2.5 * cm, 3.5 * cm, 2 * cm, 2.5 * cm, 2.5 * cm]))
+            col_widths=[2.2 * cm, 5.0 * cm, 2.4 * cm, 2.8 * cm, 2.0 * cm]))
     else:
         story.append(Paragraph("No segment size data available.", _NORMAL))
+
+    internal = cache.get("obj.oracle_segments", []) or []
+    internal = sorted(internal, key=lambda s: _num(s, "size_mb"), reverse=True)
+    story.append(Spacer(1, 10))
+    story.append(Paragraph("Largest Oracle-Maintained Segments (Descending by Size)", _H3))
+    if internal:
+        rows_internal = [[
+            _txt(s, "owner"), _txt(s, "segment_name"), _txt(s, "segment_type"),
+            _txt(s, "tablespace_name"), f"{_num(s, 'size_mb'):,.1f}",
+        ] for s in internal[:50]]
+        story.append(_styled_table(
+            ["Oracle Owner", "Segment", "Type", "Tablespace", "Size (MB)"], rows_internal,
+            col_widths=[2.2 * cm, 5.0 * cm, 2.4 * cm, 2.8 * cm, 2.0 * cm]))
+    else:
+        story.append(Paragraph(
+            "No Oracle-maintained segment size data available (or catalog access was not granted).",
+            _NORMAL))
 
     hot = cache.get("obj.top_segments", []) or []
     if hot:
         story.append(Spacer(1, 8))
-        story.append(Paragraph("Segments Under Contention", _H3))
+        story.append(Paragraph("Application Segment Activity / Contention", _H3))
         rows2 = [[
             _txt(s, "owner"), _txt(s, "object_name"), _txt(s, "object_type"),
             _txt(s, "statistic_name"), f"{_num(s, 'value'):,}",
@@ -1031,7 +1072,7 @@ class _NumberedCanvas(pdfcanvas.Canvas):
         self.saveState()
         self.setFont("Helvetica", 7)
         self.setFillColor(colors.grey)
-        self.drawString(1.5 * cm, 1 * cm, f"Generated by ORA BRABO — {datetime.now():%Y-%m-%d %H:%M:%S}")
+        self.drawString(1.5 * cm, 1 * cm, f"Generated by Oracle Dashboards — {datetime.now():%Y-%m-%d %H:%M:%S}")
         self.drawRightString(A4[0] - 1.5 * cm, 1 * cm, f"Page {self._pageNumber} of {page_count}")
         self.restoreState()
 
@@ -1048,7 +1089,7 @@ def _render(story: list, path: Path, db_name: str) -> None:
     common_kwargs = dict(
         pagesize=A4,
         leftMargin=1.5 * cm, rightMargin=1.5 * cm, topMargin=1.5 * cm, bottomMargin=1.8 * cm,
-        title=f"ORA BRABO Report - {db_name}",
+        title=f"Oracle Dashboards Report - {db_name}",
     )
     try:
         doc = _ReportDocTemplate(str(path), **common_kwargs)

@@ -3,15 +3,12 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.backends.legacy:build"
 
 [project]
-name = "ora-brabo"
+name = "oracle-dashboards"
 version = "1.3.3"
 description = "Oracle Database TUI Monitor — inspired by Dolphie, powered by Textual"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
-authors = [
-    { name = "Acacio Lima Rocha", email = "acaciolr@gmail.com" },
-]
 keywords = ["oracle", "dba", "tui", "monitoring", "database"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -32,10 +29,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ora-brabo = "app:main"
-
-[project.urls]
-Repository = "https://github.com/dbabrabo/ora-brabo"
+oracle-dashboards = "app:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

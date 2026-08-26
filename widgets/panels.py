@@ -175,7 +175,7 @@ class DashboardPanel(BasePanel):
             f"[dim]flashback:[/] {info.get('flashback_on', '?')}",
         )
         self.query_one("#dash-header", Static).update(
-            Panel(t, title="[bold white] ORA BRABO [/]", border_style="blue", padding=(0, 1))
+            Panel(t, title="[bold white] Oracle Dashboards [/]", border_style="blue", padding=(0, 1))
         )
 
     def _render_metrics(self) -> None:
@@ -1008,7 +1008,7 @@ class LocksPanel(BasePanel):
         if not blockers:
             self.query_one("#locks-summary", Static).update(
                 Panel(Text("  No blocking sessions detected.", style="dim green"),
-                      title="[bold green]Lock Monitor — DBA BRABO[/]", border_style="green")
+                      title="[bold green]Lock Monitor[/]", border_style="green")
             )
             self.query_one("#locks-detail", Static).update(Text(""))
             return
@@ -1053,7 +1053,7 @@ class LocksPanel(BasePanel):
 
         self.query_one("#locks-summary", Static).update(Panel(
             sum_t,
-            title=(f"[bold red]Lock Monitor — DBA BRABO — "
+            title=(f"[bold red]Lock Monitor — "
                    f"{len(blockers)} Blocker(s) / {len(waiters)} Waiter(s) — "
                    f"[K] Kill First[/]"),
             border_style="red", padding=(0, 0),
@@ -2416,11 +2416,11 @@ class AdvisorPanel(BasePanel):
             Text.from_markup(f"[cyan]INFO: {infos}[/]"),
         )
         self.query_one("#advisor-header", Static).update(
-            Panel(hdr, title="[bold white]ORA BRABO Advisor[/]",
+            Panel(hdr, title="[bold white]Oracle Dashboards Advisor[/]",
                   border_style="red", padding=(0, 1))
         )
 
-        # ── ORA BRABO findings ─────────────────────────────────────────────
+        # ── Oracle Dashboards findings ─────────────────────────────────────────────
         t = Table(show_header=True, header_style="bold", box=None,
                   padding=(0, 1), expand=True)
         t.add_column("Severity", width=10)
@@ -3035,7 +3035,10 @@ class IOActivityPanel(BasePanel):
     """I/O by datafile, by function, load profile, redo logs, undo stats."""
     REFRESH_RATE = 2
 
-    DEFAULT_CSS = BasePanel.DEFAULT_CSS
+    DEFAULT_CSS = BasePanel.DEFAULT_CSS + """
+    #seg-size-row { height: 18; }
+    #seg-size-row DataTable { width: 1fr; height: 18; }
+    """
 
     def compose(self) -> ComposeResult:
         yield Static(id="io-header")
@@ -3488,6 +3491,9 @@ class SegmentsPanel(BasePanel):
 
     def compose(self) -> ComposeResult:
         yield Static(id="seg-header")
+        with Horizontal(id="seg-size-row"):
+            yield DataTable(id="seg-largest-app")
+            yield DataTable(id="seg-largest-oracle")
         yield DataTable(id="seg-segments")
         yield Static(id="seg-stale")
         yield Static(id="seg-jobs")
@@ -3506,6 +3512,8 @@ class SegmentsPanel(BasePanel):
 
     async def refresh_data(self) -> None:
         top_segments = self.cache.get("obj.top_segments",   []) or []
+        biggest      = self.cache.get("obj.biggest_segments", []) or []
+        oracle_big   = self.cache.get("obj.oracle_segments", []) or []
         stale_stats  = self.cache.get("obj.stale_stats",    []) or []
         jobs         = self.cache.get("obj.scheduler_jobs", []) or []
         history      = self.cache.get("obj.scheduler_history", []) or []
@@ -3529,6 +3537,32 @@ class SegmentsPanel(BasePanel):
         self.query_one("#seg-header", Static).update(
             Panel(h, title="[bold cyan]Segments & Objects[/]", border_style="cyan", padding=(0, 1))
         )
+
+        # Largest segments by allocated bytes, split so Oracle-maintained
+        # objects never hide application growth.
+        def render_size_table(table_id: str, rows: list[dict], title: str) -> None:
+            table: DataTable = self.query_one(table_id)
+            if not table.columns:
+                table.add_columns("Owner", "Segment", "Type", "Tablespace", "Size MB")
+            table.border_title = title
+            cursor_row = table.cursor_row
+            table.clear()
+            ordered = sorted(rows, key=lambda row: float(row.get("size_mb", 0) or 0), reverse=True)
+            for row in ordered[:50]:
+                table.add_row(
+                    str(row.get("owner", "")),
+                    str(row.get("segment_name", "")),
+                    str(row.get("segment_type", "")),
+                    str(row.get("tablespace_name", "")),
+                    f"{float(row.get('size_mb', 0) or 0):,.1f}",
+                )
+            if not table.row_count:
+                table.add_row("No data", "", "", "", "")
+            elif cursor_row > 0:
+                table.move_cursor(row=min(cursor_row, table.row_count - 1))
+
+        render_size_table("#seg-largest-app", biggest, "Largest Application Segments — Size Desc")
+        render_size_table("#seg-largest-oracle", oracle_big, "Largest Oracle Internal Segments — Size Desc")
 
         # ── Top segments DataTable ─────────────────────────────────────
         filtered = [r for r in top_segments

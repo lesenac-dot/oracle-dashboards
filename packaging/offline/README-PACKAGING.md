@@ -3,8 +3,8 @@
 Todo pacote offline gerado para o servidor de produção DEVE conter, na raiz:
 
 ```
-ora-brabo-offline/
-├── ora_brabo/            # código da app (com requirements.txt e requirements-optional.txt)
+oracle-dashboards-offline/
+├── oracle_dashboards/            # código da app (com requirements.txt e requirements-optional.txt)
 ├── wheels/               # TODAS as dependencias em wheel (cp311, x86_64, glibc 2.28)
 ├── install.sh            # primeira instalacao offline (deste diretorio: packaging/offline/)
 ├── reinstall.sh          # recria o venv do zero (usar ao ATUALIZAR / se corromper)
@@ -21,9 +21,9 @@ Regras:
 
 Layout no servidor (versionado + symlink para rollback fácil):
 ```
-/home/oracle/acaciolr/orabrabo/
+/home/oracle/oracle-dashboards/
 ├── python/               # python-build-standalone (reutilizado entre versoes)
-├── ora-brabo-1.3.3/      # cada versao numa pasta
-├── ora-brabo-1.3.4/
-└── current -> ora-brabo-1.3.4   # o alias aponta para 'current'
+├── oracle-dashboards-1.3.3/      # cada versao numa pasta
+├── oracle-dashboards-1.3.4/
+└── current -> oracle-dashboards-1.3.4   # o alias aponta para 'current'
 ```

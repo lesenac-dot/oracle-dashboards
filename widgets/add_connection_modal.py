@@ -268,7 +268,7 @@ class AddConnectionModal(ModalScreen[AppConfig | None]):
 
     def compose(self) -> ComposeResult:
         with Vertical(id="dialog"):
-            yield Static(f"◆ ORA BRABO — New Oracle Connection    ·    v{__version__}",
+            yield Static(f"◆ Oracle Dashboards — New Oracle Connection    ·    v{__version__}",
                          id="dialog-title")
 
             with Horizontal(id="two-col"):

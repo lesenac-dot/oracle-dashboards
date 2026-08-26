@@ -100,7 +100,7 @@ _DEFAULT_PRIMARY_KEY = "health.total_sessions"
 class ConnectionPane(Widget):
     """
     Hosts all 12 panels for one Oracle connection.
-    Panel switching (F1–F12) is delegated here by OraBraboApp.
+    Panel switching (F1–F12) is delegated here by OracleDashboardsApp.
     """
 
     DEFAULT_CSS = """

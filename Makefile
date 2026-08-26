@@ -1,4 +1,4 @@
-# ORA BRABO — Makefile
+# Oracle Dashboards — Makefile
 VENV    := .venv
 PYTHON  := $(VENV)/bin/python
 PIP     := $(VENV)/bin/pip
@@ -9,9 +9,9 @@ PIP     := $(VENV)/bin/pip
 install:
 	@bash install.sh
 
-## Roda o ORA BRABO (usa venv se existir)
+## Roda o Oracle Dashboards (usa venv se existir)
 run:
-	@bash ora_brabo.sh
+	@bash oracle_dashboards.sh
 
 ## Instala dependências de desenvolvimento (textual devtools)
 dev: $(VENV)
@@ -25,4 +25,4 @@ $(VENV):
 
 ## Remove virtualenv e arquivos temporários
 clean:
-	rm -rf $(VENV) __pycache__ **/__pycache__ *.pyc **/*.pyc /tmp/ora_brabo.log
+	rm -rf $(VENV) __pycache__ **/__pycache__ *.pyc **/*.pyc /tmp/oracle_dashboards.log

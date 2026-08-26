@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# ORA BRABO — Instalador
+# Oracle Dashboards — Instalador
 # Cria virtualenv isolado e instala dependências.
-# Também adiciona o alias `ora_brabo` ao ~/.zshrc (ou ~/.bashrc).
+# Também adiciona o alias `oracle_dashboards` ao ~/.zshrc (ou ~/.bashrc).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,7 +17,7 @@ fi
 
 echo ""
 echo "╔══════════════════════════════════════════╗"
-echo "║   ORA BRABO — Instalação                 ║"
+echo "║   Oracle Dashboards — Instalação                 ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 
@@ -38,14 +38,14 @@ echo "→ Dependências instaladas:"
 "$VENV_DIR/bin/pip" show oracledb textual rich 2>/dev/null | grep -E "^(Name|Version):" | paste - -
 
 # ── Alias ───────────────────────────────────────────────────────────
-ALIAS_LINE="alias ora_brabo='\"$SCRIPT_DIR/ora_brabo.sh\"'"
+ALIAS_LINE="alias oracle_dashboards='\"$SCRIPT_DIR/oracle_dashboards.sh\"'"
 
 if [[ -n "$SHELL_RC" ]]; then
-    if grep -q "ora_brabo" "$SHELL_RC" 2>/dev/null; then
-        echo "→ Alias ora_brabo já existe em $SHELL_RC"
+    if grep -q "oracle_dashboards" "$SHELL_RC" 2>/dev/null; then
+        echo "→ Alias oracle_dashboards já existe em $SHELL_RC"
     else
         echo "" >> "$SHELL_RC"
-        echo "# ── ORA BRABO ──────────────────────────────────────────────────────" >> "$SHELL_RC"
+        echo "# ── Oracle Dashboards ──────────────────────────────────────────────────────" >> "$SHELL_RC"
         echo "$ALIAS_LINE" >> "$SHELL_RC"
         echo "→ Alias adicionado em $SHELL_RC"
     fi
@@ -60,7 +60,7 @@ echo "║   Instalação concluída!                  ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 echo "  Recarregue o shell:   source $SHELL_RC"
-echo "  Ou execute direto:    $SCRIPT_DIR/ora_brabo.sh"
+echo "  Ou execute direto:    $SCRIPT_DIR/oracle_dashboards.sh"
 echo ""
 echo "  Opcional (export de PDF do painel F-Report):"
 echo "    \"$VENV_DIR/bin/pip\" install --prefer-binary -r \"$SCRIPT_DIR/requirements-optional.txt\""

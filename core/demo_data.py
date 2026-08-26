@@ -23,7 +23,7 @@ _DB_INFO = {
     "dbid":           "1423756891",
     "db_unique_name": "ORCL_PRIMARY",
     "version":        "19.19.0.0.0",
-    "host_name":      "oraserver01.brabolab.local",
+    "host_name":      "oraserver01.example.com",
     "instance_name":  "ORCL1",
     "open_mode":      "READ WRITE",
     "database_role":  "PRIMARY",
@@ -114,17 +114,17 @@ _SESSIONS_BASE = [
     {"sid": 234, "serial": 1293, "username": "APP_USER",   "status": "ACTIVE",  "osuser": "appsvr02", "machine": "appserver02", "program": "JDBC Thin Client", "sql_id": "8fkg2hzmdq1wx", "wait_event": "log file sync",             "wait_class": "Commit",       "blocking_session": None, "logon_time": datetime.now()-timedelta(hours=1),  "last_call_et": 0},
     {"sid": 89,  "serial": 7712, "username": "BATCH_USR",  "status": "ACTIVE",  "osuser": "oracle",   "machine": "oraserver01", "program": "python@batch01",   "sql_id": "2mx8vbwqc5pla", "wait_event": "db file parallel read",     "wait_class": "User I/O",    "blocking_session": None, "logon_time": datetime.now()-timedelta(hours=6),  "last_call_et": 0},
     {"sid": 341, "serial": 9921, "username": "APP_USER",   "status": "ACTIVE",  "osuser": "appsvr01", "machine": "appserver01", "program": "JDBC Thin Client", "sql_id": "8fkg2hzmdq1wx", "wait_event": "enq: TX - row lock contention","wait_class":"Application","blocking_session": 112,  "logon_time": datetime.now()-timedelta(minutes=30),"last_call_et": 0},
-    {"sid": 156, "serial": 3344, "username": "DBA_MONITOR","status": "ACTIVE",  "osuser": "acaciolr", "machine": "MacBook-Pro",  "program": "ORA BRABO",        "sql_id": "g7z1nkpq9r4ty", "wait_event": "SQL*Net message from client","wait_class": "Idle",        "blocking_session": None, "logon_time": datetime.now()-timedelta(minutes=5),  "last_call_et": 0},
+    {"sid": 156, "serial": 3344, "username": "DBA_MONITOR","status": "ACTIVE",  "osuser": "monitor", "machine": "monitor-pc",  "program": "Oracle Monitor",        "sql_id": "g7z1nkpq9r4ty", "wait_event": "SQL*Net message from client","wait_class": "Idle",        "blocking_session": None, "logon_time": datetime.now()-timedelta(minutes=5),  "last_call_et": 0},
     {"sid": 44,  "serial": 182,  "username": "SYS",        "status": "ACTIVE",  "osuser": "oracle",   "machine": "oraserver01", "program": "oracle@oraserver01","sql_id": None,            "wait_event": "pmon timer",                "wait_class": "Idle",        "blocking_session": None, "logon_time": datetime.now()-timedelta(days=14),    "last_call_et": 0},
     {"sid": 55,  "serial": 290,  "username": "SYS",        "status": "ACTIVE",  "osuser": "oracle",   "machine": "oraserver01", "program": "oracle@oraserver01","sql_id": None,            "wait_event": "smon timer",                "wait_class": "Idle",        "blocking_session": None, "logon_time": datetime.now()-timedelta(days=14),    "last_call_et": 0},
 ]
 
 _EXA_CELLS = [
-    {"cell_name": "exa-cell-01.brabolab.local", "ip_address": "192.168.10.11",
+    {"cell_name": "exa-cell-01.example.com", "ip_address": "192.168.10.11",
      "interconnect_ip": "192.168.20.11", "cell_status": "online", "cell_version": "19.3.0.0.0"},
-    {"cell_name": "exa-cell-02.brabolab.local", "ip_address": "192.168.10.12",
+    {"cell_name": "exa-cell-02.example.com", "ip_address": "192.168.10.12",
      "interconnect_ip": "192.168.20.12", "cell_status": "online", "cell_version": "19.3.0.0.0"},
-    {"cell_name": "exa-cell-03.brabolab.local", "ip_address": "192.168.10.13",
+    {"cell_name": "exa-cell-03.example.com", "ip_address": "192.168.10.13",
      "interconnect_ip": "192.168.20.13", "cell_status": "online", "cell_version": "19.3.0.0.0"},
 ]
 
@@ -218,11 +218,11 @@ _PDB_TABLESPACES = [
 ]
 
 _RAC_SERVICES = [
-    {"name": "APP_SVC",      "network_name": "APP_SVC.brabolab.local",   "enabled": "YES", "goal": "LONG",  "clb_goal": "LONG",  "svc_status": "RUNNING", "inst_id": 1},
-    {"name": "REPORT_SVC",   "network_name": "REPORT_SVC.brabolab.local","enabled": "YES", "goal": "SHORT", "clb_goal": "SHORT", "svc_status": "RUNNING", "inst_id": 2},
-    {"name": "BATCH_SVC",    "network_name": "BATCH_SVC.brabolab.local", "enabled": "YES", "goal": "LONG",  "clb_goal": "LONG",  "svc_status": "STOPPED", "inst_id": None},
-    {"name": "DWH_SVC",      "network_name": "DWH_SVC.brabolab.local",   "enabled": "YES", "goal": "LONG",  "clb_goal": "LONG",  "svc_status": "RUNNING", "inst_id": 1},
-    {"name": "BACKUP_SVC",   "network_name": "BACKUP_SVC.brabolab.local","enabled": "NO",  "goal": "NONE",  "clb_goal": "NONE",  "svc_status": "STOPPED", "inst_id": None},
+    {"name": "APP_SVC",      "network_name": "APP_SVC.example.com",   "enabled": "YES", "goal": "LONG",  "clb_goal": "LONG",  "svc_status": "RUNNING", "inst_id": 1},
+    {"name": "REPORT_SVC",   "network_name": "REPORT_SVC.example.com","enabled": "YES", "goal": "SHORT", "clb_goal": "SHORT", "svc_status": "RUNNING", "inst_id": 2},
+    {"name": "BATCH_SVC",    "network_name": "BATCH_SVC.example.com", "enabled": "YES", "goal": "LONG",  "clb_goal": "LONG",  "svc_status": "STOPPED", "inst_id": None},
+    {"name": "DWH_SVC",      "network_name": "DWH_SVC.example.com",   "enabled": "YES", "goal": "LONG",  "clb_goal": "LONG",  "svc_status": "RUNNING", "inst_id": 1},
+    {"name": "BACKUP_SVC",   "network_name": "BACKUP_SVC.example.com","enabled": "NO",  "goal": "NONE",  "clb_goal": "NONE",  "svc_status": "STOPPED", "inst_id": None},
 ]
 
 _AWR_TOP_SQL = [
@@ -329,7 +329,7 @@ _LOCK_BLOCKERS = [
     {"sid": 112, "id1": 589723, "id2": 1, "lock_type": "TX",
      "ctime_secs": 187,
      "username": "APP_USER", "status": "ACTIVE",
-     "osuser": "appsvr01", "machine": "appserver01.brabolab.local",
+     "osuser": "appsvr01", "machine": "appserver01.example.com",
      "program": "JDBC Thin Client", "serial_num": 4821,
      "instance_name": "ORCL1", "host_name": "oraserver01",
      "sql_id": "3yru4fqvqpzwm", "inst_id": 1,
@@ -805,13 +805,13 @@ class DemoRunner:
             {"type": "SCHEDULER", "owner": "APP_OWNER", "name": "EXPURGO_LOGS", "state": "SCHEDULED",
              "enabled": "TRUE", "last_start": "16/08/2026 02:00:05", "run_count": 365, "failures": 3,
              "next_run": "17/08/2026 02:00:00", "detail": "Purge de logs > 90d"},
-            {"type": "SCHEDULER", "owner": "DBA_BRABO", "name": "COLETA_ESTATISTICAS", "state": "RUNNING",
+            {"type": "SCHEDULER", "owner": "APP_ADMIN", "name": "COLETA_ESTATISTICAS", "state": "RUNNING",
              "enabled": "TRUE", "last_start": "16/08/2026 22:00:00", "run_count": 730, "failures": 0,
              "next_run": "17/08/2026 22:00:00", "detail": "Gather stats custom"},
             {"type": "SCHEDULER", "owner": "APP_OWNER", "name": "INTEGRA_ERP", "state": "BROKEN",
              "enabled": "FALSE", "last_start": "15/08/2026 06:00:00", "run_count": 190, "failures": 12,
              "next_run": "", "detail": "ORA-12541 no dblink"},
-            {"type": "SCHEDULER", "owner": "DBA_BRABO", "name": "RMAN_BACKUP_INC", "state": "SCHEDULED",
+            {"type": "SCHEDULER", "owner": "APP_ADMIN", "name": "RMAN_BACKUP_INC", "state": "SCHEDULED",
              "enabled": "TRUE", "last_start": "16/08/2026 23:00:00", "run_count": 365, "failures": 1,
              "next_run": "17/08/2026 23:00:00", "detail": "Backup incremental"},
             {"type": "DBMS_JOB", "owner": "LEGADO", "name": "JOB#142", "state": "SCHEDULED",
@@ -822,7 +822,7 @@ class DemoRunner:
              "next_run": "", "detail": "BEGIN pkg_legado.integra; END;"},
         ], ttl=86400)
         c.set("jobs.running", [
-            {"owner": "DBA_BRABO", "job_name": "COLETA_ESTATISTICAS", "start_date": "16/08/2026 22:00:00",
+            {"owner": "APP_ADMIN", "job_name": "COLETA_ESTATISTICAS", "start_date": "16/08/2026 22:00:00",
              "elapsed_time": "0 0:12:31", "session_id": 148, "running_instance": 1},
         ], ttl=86400)
         c.set("jobs.upcoming", [
@@ -832,9 +832,9 @@ class DemoRunner:
              "schedule_type": "CALENDAR", "state": "SCHEDULED"},
             {"owner": "LEGADO", "job_name": "JOB#142", "next_run_date": "17/08/2026 12:00:00",
              "schedule_type": "CALENDAR", "state": "SCHEDULED"},
-            {"owner": "DBA_BRABO", "job_name": "COLETA_ESTATISTICAS", "next_run_date": "17/08/2026 22:00:00",
+            {"owner": "APP_ADMIN", "job_name": "COLETA_ESTATISTICAS", "next_run_date": "17/08/2026 22:00:00",
              "schedule_type": "CALENDAR", "state": "SCHEDULED"},
-            {"owner": "DBA_BRABO", "job_name": "RMAN_BACKUP_INC", "next_run_date": "17/08/2026 23:00:00",
+            {"owner": "APP_ADMIN", "job_name": "RMAN_BACKUP_INC", "next_run_date": "17/08/2026 23:00:00",
              "schedule_type": "CALENDAR", "state": "SCHEDULED"},
         ], ttl=86400)
         c.set("jobs.daily", [
@@ -851,7 +851,7 @@ class DemoRunner:
         c.set("exa.cells",           _EXA_CELLS,    ttl=86400)
         c.set("rac.interconnect",    _RAC_INTERCONNECT,    ttl=86400)
         c.set("asm.large_segments",  _ASM_LARGE_SEGMENTS,  ttl=86400)
-        c.set("dg.standby_host",     "orastandby01.brabolab.local", ttl=86400)
+        c.set("dg.standby_host",     "orastandby01.example.com", ttl=86400)
         c.set("dg.standby_unique_name", "ORCL_STANDBY",    ttl=86400)
         c.set("dg.rac_processes",   _DG_RAC_PROCESSES, ttl=86400)
         c.set("asm.disks",          _ASM_DISKS,        ttl=86400)

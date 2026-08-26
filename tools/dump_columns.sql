@@ -1,5 +1,5 @@
 -- ============================================================================
--- ORA BRABO — dump de colunas das views/tabelas usadas pelos collectors
+-- Oracle Dashboards — dump de colunas das views/tabelas usadas pelos collectors
 -- ----------------------------------------------------------------------------
 -- OBJETIVO: listar TODAS as colunas reais (no SEU banco) de cada objeto que as
 -- queries usam, para validar de uma vez se alguma coluna referenciada não
