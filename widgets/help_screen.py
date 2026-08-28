@@ -56,6 +56,7 @@ class HelpScreen(ModalScreen):
         ("T",        "Enable SQL Trace on session",                  "Actions"),
         ("E / Enter","Explain Plan for selected SQL",                "Actions"),
         ("S",        "Enter SQL ID manually for Explain Plan",       "Actions"),
+        ("C",        "Copy selected SQL ID",                         "Actions"),
         ("D",        "Session detail (on F2 Sessions panel)",        "Actions"),
         ("/",        "Filter sessions (on F2 Sessions panel)",       "Actions"),
         ("Esc",      "Close filter / modal / screen",                "Actions"),

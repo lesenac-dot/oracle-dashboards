@@ -201,11 +201,19 @@ class ConnectionPane(Widget):
     async def forward_explain(self) -> None:
         sid = self.session.id
         try:
-            panel = self.query_one(f"#panel-topsql-{sid}")
-            if hasattr(panel, "action_explain"):
-                await panel.action_explain()
-        except Exception:
-            pass
+            panel = self.query_one(f"#panel-{self._active_panel}-{sid}")
+            action = getattr(panel, "action_show_explain", None)
+            if action is None:
+                action = getattr(panel, "action_show_sql_detail", None)
+            if action is None:
+                self.app.notify("Explain Plan is not available in this panel", severity="warning")
+                return
+            result = action()
+            if hasattr(result, "__await__"):
+                await result
+        except Exception as exc:
+            log.exception("Explain action failed [session=%s, panel=%s]", sid, self._active_panel)
+            self.app.notify(f"Explain Plan failed: {exc}", severity="error")
 
     async def forward_awr(self) -> None:
         sid = self.session.id

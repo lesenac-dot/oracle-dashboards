@@ -7,7 +7,10 @@ Dolphie-inspired professional layout using Rich Table.grid(), Panel, Columns, an
 from __future__ import annotations
 
 import asyncio
+import base64
 import logging
+import subprocess
+import sys
 import time
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -77,6 +80,28 @@ class BasePanel(Widget):
 
     async def refresh_data(self) -> None:
         self.refresh()
+
+    def copy_to_clipboard(self, value: str, label: str = "Value") -> bool:
+        """Copy text locally on Windows or through OSC 52 in remote terminals."""
+        if not value:
+            self.app.notify(f"No {label.lower()} selected", severity="warning")
+            return False
+        try:
+            if sys.platform == "win32":
+                subprocess.run(
+                    ["clip.exe"], input=value, text=True, check=True,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+            else:
+                encoded = base64.b64encode(value.encode("utf-8")).decode("ascii")
+                sys.stdout.write(f"\033]52;c;{encoded}\a")
+                sys.stdout.flush()
+        except Exception as exc:
+            log.warning("Clipboard copy failed: %s", exc)
+            self.app.notify(f"Could not copy {label}", severity="error")
+            return False
+        self.app.notify(f"{label} copied: {value}")
+        return True
 
 
 # ---------------------------------------------------------------------------
@@ -571,6 +596,7 @@ class TopSQLPanel(BasePanel):
     BINDINGS = [
         Binding("enter", "show_explain", "Explain Plan", show=True),
         Binding("s",     "input_sql_id", "SQL ID...",    show=True),
+        Binding("c",     "copy_sql_id",  "Copy SQL ID",  show=True),
     ]
 
     DEFAULT_CSS = BasePanel.DEFAULT_CSS + """
@@ -595,11 +621,13 @@ class TopSQLPanel(BasePanel):
             yield Graph("CPU Seconds (Top SQL)", color=(252,  89,  86), unit="s", id="graph-sql-cpu")
             yield Graph("Elapsed Seconds",       color=( 68, 180, 255), unit="s", id="graph-sql-ela")
             yield Graph("Buffer Gets (K)",       color=(226, 183,  20), unit="K", id="graph-sql-buf")
-        yield DataTable(id="sql-table")
+        yield DataTable(id="sql-table", cursor_type="row")
         yield Static(id="sql-preview")
 
     # ── Event: update preview when the cursor moves ──────────────────
     def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
+        if event.data_table.id != "sql-table":
+            return
         rows = self._sql_top
         idx  = event.cursor_row
         if not rows or idx < 0 or idx >= len(rows):
@@ -620,6 +648,11 @@ class TopSQLPanel(BasePanel):
             Panel(prev, title="[bold #bbc8e8]SQL Preview[/]",
                   border_style="#384c7a", padding=(0, 1))
         )
+
+    async def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
+        if event.data_table.id == "sql-table":
+            event.stop()
+            await self.action_show_explain()
 
     async def refresh_data(self) -> None:
         sql_top = self.cache.get("sql.top", []) or []
@@ -669,7 +702,7 @@ class TopSQLPanel(BasePanel):
         )
         h.add_row(
             Text.from_markup("[dim]Enter[/]=Explain Plan"),
-            Text.from_markup("[dim]S[/]=SQL ID direto"),
+            Text.from_markup("[dim]C[/]=Copiar SQL ID  [dim]S[/]=SQL ID direto"),
             Text.from_markup("[dim]↑↓[/]=Navegar  Preview automático"),
         )
         self.query_one("#sql-header", Static).update(
@@ -687,7 +720,7 @@ class TopSQLPanel(BasePanel):
             )
         dt.border_title = (
             f"Top SQL  [{len(sql_top)} statements]  "
-            "Enter=Explain Plan   S=SQL ID"
+            "Enter=Explain Plan   C=Copy SQL ID   S=SQL ID"
         )
         cursor = dt.cursor_row
         dt.clear()
@@ -791,8 +824,21 @@ class TopSQLPanel(BasePanel):
             self.app.notify("No SQL ID for selected row", severity="warning")
             return
         self.app.notify(f"Fetching plan for {sql_id}…", timeout=3)
-        sql_txt, plan = await self._fetch_explain(sql_id, str(r.get("sql_text_short", "")))
+        try:
+            sql_txt, plan = await self._fetch_explain(sql_id, str(r.get("sql_text_short", "")))
+        except Exception as exc:
+            log.exception("Explain Plan failed for %s", sql_id)
+            self.app.notify(f"Explain Plan failed: {exc}", severity="error", timeout=8)
+            return
         self.app.push_screen(ExplainScreen(sql_id, sql_txt, plan))
+
+    def action_copy_sql_id(self) -> None:
+        dt: DataTable = self.query_one("#sql-table")
+        row_idx = dt.cursor_row
+        if 0 <= row_idx < len(self._sql_top):
+            self.copy_to_clipboard(str(self._sql_top[row_idx].get("sql_id", "")), "SQL ID")
+        else:
+            self.app.notify("No SQL selected", severity="warning")
 
     def action_input_sql_id(self) -> None:
         from widgets.sql_input_screen import SQLInputScreen
@@ -2392,7 +2438,7 @@ class AdvisorPanel(BasePanel):
         yield Static(id="advisor-advisors")
         yield Static(id="advisor-oracle-findings")
         yield Static(id="advisor-sql-label")
-        yield DataTable(id="advisor-sql-dt", show_cursor=True, zebra_stripes=True)
+        yield DataTable(id="advisor-sql-dt", show_cursor=True, zebra_stripes=True, cursor_type="row")
         yield Static(id="advisor-sql-plan")
         yield Static(id="advisor-exa")
 
@@ -2601,6 +2647,11 @@ class AdvisorPanel(BasePanel):
             plan   = [p for p in plan if p.get("sql_id") == sql_id] or plan
             return sql_id, sql_txt, plan
         return None
+
+    def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
+        if event.data_table.id == "advisor-sql-dt":
+            event.stop()
+            self.action_show_sql_detail()
 
     def action_show_sql_detail(self) -> None:
         from widgets.explain_screen import ExplainScreen
@@ -3719,12 +3770,18 @@ class SQLMonitorPanel(BasePanel):
 
     def compose(self) -> ComposeResult:
         yield Static(id="sqlmon-header")
-        yield DataTable(id="sqlmon-table")
+        yield DataTable(id="sqlmon-table", cursor_type="row")
         yield Static(id="sqlmon-sql-preview")
         yield Static(id="sqlmon-plan")
 
     def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
-        self._select_row(event.cursor_row)
+        if event.data_table.id == "sqlmon-table":
+            self._select_row(event.cursor_row)
+
+    def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
+        if event.data_table.id == "sqlmon-table":
+            event.stop()
+            self.action_show_sql_text()
 
     def _select_row(self, idx: int | None) -> None:
         """Update the SQL-text preview and the inline execution plan for a row.
@@ -4431,9 +4488,9 @@ class PlanHistPanel(BasePanel):
     def compose(self) -> ComposeResult:
         yield Static(id="ph-header")
         yield Static("[dim]  SQLs com instabilidade de plano (>1 plano)[/]", classes="ph-lbl")
-        yield DataTable(id="ph-sql")
+        yield DataTable(id="ph-sql", cursor_type="row")
         yield Static("[dim]  Planos do SQL selecionado — [ATUAL] / [MELHOR] / regressão em vermelho[/]", classes="ph-lbl")
-        yield DataTable(id="ph-plans")
+        yield DataTable(id="ph-plans", cursor_type="row")
         yield Static(id="ph-plan")
         yield Static(id="ph-timeline")
 
@@ -4792,7 +4849,7 @@ class JobsPanel(BasePanel):
         yield Static(id="jobs-header")
         yield Static(id="jobs-chart")
         yield Static("[dim]  Jobs (negócio / DBA) — selecione para ver o histórico[/]", classes="ph-lbl")
-        yield DataTable(id="jobs-table")
+        yield DataTable(id="jobs-table", cursor_type="row")
         yield Static("[dim]  Próximas execuções[/]", classes="ph-lbl")
         yield DataTable(id="jobs-upcoming")
         yield Static(id="jobs-runhist")
